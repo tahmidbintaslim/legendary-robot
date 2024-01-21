@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>USDT Transfer Monitor</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript">
+    const eventSource = new EventSource('/stream');
+    
+    eventSource.onmessage = function(e) {
+        console.log("Event received:", e.data); // Log received event data
+        const eventData = JSON.parse(e.data);
+        console.log("Event data:", eventData);
+
+        const argsData = eventData.args;
+        
+        // Check if 'argsData' contains the 'from', 'to', and 'value' properties
+        if (argsData.includes("'from':") && argsData.includes("'to':") && argsData.includes("'value':")) {
+            // Extract 'from', 'to', and 'value' from 'argsData' using regex
+            const fromMatch = argsData.match(/'from': '([^']+)'/);
+            const toMatch = argsData.match(/'to': '([^']+)'/);
+            const valueMatch = argsData.match(/'value': (\d+)/);
+            
+            if (fromMatch && toMatch && valueMatch) {
+                const from = fromMatch[1];
+                const to = toMatch[1];
+                const value = valueMatch[1];
+
+                // Extract the transactionHash string without 'b' and single quotes
+                const rawTransactionHash = eventData.transactionHash.replace(/^b'/, '').replace(/'$/, '');
+
+                // Display extracted data in the HTML
+                const formattedData = `
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <h5 class="card-title">Transaction</h5>
+                            <p class="card-text">From: ${from}</p>
+                            <p class="card-text">To: ${to}</p>
+                            <p class="card-text">Value: ${value}</p>
+                            <p class="card-text">Transaction Hash: 0x${rawTransactionHash}</p>
+                            <p class="card-text">Block Number: ${eventData.blockNumber}</p>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('events').innerHTML += formattedData;
+            } else {
+                console.error("Failed to extract 'from', 'to', or 'value' from 'argsData'.");
+            }
+        } else {
+            console.error("Invalid 'argsData' format:", argsData);
+        }
+    };
+
+    eventSource.onerror = function(e) {
+        console.error("EventSource failed:", e); // Log any errors
+    };
+
+    eventSource.onopen = function() {
+        console.log("Connection to server opened."); // Log when the connection is opened
+    };
+</script>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">USDT Transfer Events</h1>
+        <div id="events"></div>
+    </div>
+</body>
+</html>
