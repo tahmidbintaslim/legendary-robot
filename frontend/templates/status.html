@@ -14,38 +14,29 @@
 
         const argsData = eventData.args;
         
-        // Check if 'argsData' contains the 'from', 'to', and 'value' properties
-        if (argsData.includes("'from':") && argsData.includes("'to':") && argsData.includes("'value':")) {
-            // Extract 'from', 'to', and 'value' from 'argsData' using regex
-            const fromMatch = argsData.match(/'from': '([^']+)'/);
-            const toMatch = argsData.match(/'to': '([^']+)'/);
-            const valueMatch = argsData.match(/'value': (\d+)/);
-            
-            if (fromMatch && toMatch && valueMatch) {
-                const from = fromMatch[1];
-                const to = toMatch[1];
-                const value = valueMatch[1];
+        // Check if 'argsData' is an object with the required properties
+        if (argsData && argsData.from && argsData.to && argsData.value) {
+            const from = argsData.from;
+            const to = argsData.to;
+            const value = argsData.value;
 
-                // Extract the transactionHash string without 'b' and single quotes
-                const rawTransactionHash = eventData.transactionHash.replace(/^b'/, '').replace(/'$/, '');
+            // Extract the transactionHash string without 'b' and single quotes
+            const rawTransactionHash = eventData.transactionHash.replace(/^b'/, '').replace(/'$/, '');
 
-                // Display extracted data in the HTML
-                const formattedData = `
-                    <div class="card mb-2">
-                        <div class="card-body">
-                            <h5 class="card-title">Transaction</h5>
-                            <p class="card-text">From: ${from}</p>
-                            <p class="card-text">To: ${to}</p>
-                            <p class="card-text">Value: ${value}</p>
-                            <p class="card-text">Transaction Hash: 0x${rawTransactionHash}</p>
-                            <p class="card-text">Block Number: ${eventData.blockNumber}</p>
-                        </div>
+            // Display extracted data in the HTML
+            const formattedData = `
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <h5 class="card-title">Transaction</h5>
+                        <p class="card-text">From: ${from}</p>
+                        <p class="card-text">To: ${to}</p>
+                        <p class="card-text">Value: ${value}</p>
+                        <p class="card-text">Transaction Hash: 0x${rawTransactionHash}</p>
+                        <p class="card-text">Block Number: ${eventData.blockNumber}</p>
                     </div>
-                `;
-                document.getElementById('events').innerHTML += formattedData;
-            } else {
-                console.error("Failed to extract 'from', 'to', or 'value' from 'argsData'.");
-            }
+                </div>
+            `;
+            document.getElementById('events').innerHTML += formattedData;
         } else {
             console.error("Invalid 'argsData' format:", argsData);
         }
